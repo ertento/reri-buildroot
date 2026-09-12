@@ -1,0 +1,6 @@
+config BR2_PACKAGE_RERI_MONITOR
+	bool "RERI laboratory monitor"
+	select BR2_PACKAGE_PYTHON3
+	select BR2_PACKAGE_PYTHON3_SQLITE
+	help
+	  Laboratory dashboard with RERI MMIO inspection and test injection.

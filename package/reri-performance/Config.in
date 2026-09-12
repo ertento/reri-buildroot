@@ -1,0 +1,8 @@
+config BR2_PACKAGE_RERI_PERFORMANCE
+	bool "RERI performance monitor"
+	select BR2_PACKAGE_PYTHON3
+	select BR2_PACKAGE_PYTHON3_SQLITE
+	select BR2_PACKAGE_RERI_PAPI
+	help
+	  Dashboard that correlates Linux GHES events with per-hart PAPI
+	  cycle, instruction, and IPC samples.

@@ -1,0 +1,5 @@
+config BR2_PACKAGE_RERI_PAPI
+	bool "PAPI with RISC-V SBI PMU support"
+	help
+	  PAPI 7.2 with support for the Linux RISC-V SBI perf PMU and the
+	  exclude_hv behavior required by the current kernel driver.

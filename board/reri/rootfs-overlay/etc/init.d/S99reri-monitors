@@ -1,0 +1,125 @@
+#!/bin/sh
+
+LAB_DIR="/opt/reri-monitor"
+STANDARD_DIR="/opt/reri_monitor_standard"
+PERFORMANCE_DIR="/opt/reri_monitor_performance"
+LAB_PID="/var/run/reri-monitor.pid"
+STANDARD_PID="/var/run/reri-monitor-standard.pid"
+PERFORMANCE_PID="/var/run/reri-monitor-performance.pid"
+LAB_LOG="/var/log/reri-monitor.log"
+STANDARD_LOG="/var/log/reri-monitor-standard.log"
+PERFORMANCE_LOG="/var/log/reri-monitor-performance.log"
+
+boot_profile()
+{
+    case "$(cat /proc/cmdline 2>/dev/null)" in
+        *reri.profile=lab*) echo "lab" ;;
+        *reri.profile=standard*) echo "standard" ;;
+        *reri.profile=performance*) echo "performance" ;;
+        *) echo "both" ;;
+    esac
+}
+
+is_running()
+{
+    pid_file="$1"
+    test -s "$pid_file" || return 1
+    kill -0 "$(cat "$pid_file")" 2>/dev/null
+}
+
+start_lab()
+{
+    if is_running "$LAB_PID"; then
+        echo "reri_monitor is already running"
+        return 0
+    fi
+    echo "Starting reri_monitor on port 8080"
+    (
+        cd "$LAB_DIR" || exit 1
+        exec env RERI_MONITOR_BACKEND="mmio" RERI_MONITOR_PORT="8080" \
+            PYTHONPATH="$LAB_DIR" python3 -u -m app.main
+    ) >>"$LAB_LOG" 2>&1 <"/dev/null" &
+    echo "$!" >"$LAB_PID"
+}
+
+start_standard()
+{
+    if is_running "$STANDARD_PID"; then
+        echo "reri_monitor_standard is already running"
+        return 0
+    fi
+    echo "Starting reri_monitor_standard on port 8081"
+    (
+        cd "$STANDARD_DIR" || exit 1
+        exec env RERI_STANDARD_PORT="8081" PYTHONPATH="$STANDARD_DIR" \
+            python3 -u -m app.main
+    ) >>"$STANDARD_LOG" 2>&1 <"/dev/null" &
+    echo "$!" >"$STANDARD_PID"
+}
+
+start_performance()
+{
+    if is_running "$PERFORMANCE_PID"; then
+        echo "reri_monitor_performance is already running"
+        return 0
+    fi
+    echo "Starting reri_monitor_performance on port 8082"
+    (
+        cd "$PERFORMANCE_DIR" || exit 1
+        exec env RERI_PERFORMANCE_PORT="8082" PYTHONPATH="$PERFORMANCE_DIR" \
+            python3 -u -m app.main
+    ) >>"$PERFORMANCE_LOG" 2>&1 <"/dev/null" &
+    echo "$!" >"$PERFORMANCE_PID"
+}
+
+stop_one()
+{
+    name="$1"
+    pid_file="$2"
+    if ! is_running "$pid_file"; then
+        rm -f "$pid_file"
+        return 0
+    fi
+    echo "Stopping $name"
+    kill "$(cat "$pid_file")" 2>/dev/null || true
+    rm -f "$pid_file"
+}
+
+case "$1" in
+    start)
+        mkdir -p "/var/lib/reri-monitor" "/var/lib/reri-monitor-standard" \
+            "/var/lib/reri-monitor-performance" "/var/log" "/var/run"
+        profile="$(boot_profile)"
+        echo "RERI boot profile: $profile"
+        case "$profile" in
+            lab) start_lab ;;
+            standard) start_standard ;;
+            performance) start_performance ;;
+            both)
+                start_lab
+                start_standard
+                ;;
+        esac
+        ;;
+    stop)
+        stop_one "reri_monitor_performance" "$PERFORMANCE_PID"
+        stop_one "reri_monitor_standard" "$STANDARD_PID"
+        stop_one "reri_monitor" "$LAB_PID"
+        ;;
+    restart)
+        "$0" stop
+        "$0" start
+        ;;
+    status)
+        echo "RERI boot profile: $(boot_profile)"
+        if is_running "$LAB_PID"; then echo "reri_monitor: running"; else echo "reri_monitor: stopped"; fi
+        if is_running "$STANDARD_PID"; then echo "reri_monitor_standard: running"; else echo "reri_monitor_standard: stopped"; fi
+        if is_running "$PERFORMANCE_PID"; then echo "reri_monitor_performance: running"; else echo "reri_monitor_performance: stopped"; fi
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
