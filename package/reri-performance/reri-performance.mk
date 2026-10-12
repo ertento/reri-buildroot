@@ -2,7 +2,7 @@
 # RERI performance monitor
 ################################################################################
 
-RERI_PERFORMANCE_VERSION = 3b285e0a7176d5fe089f63f2f3bf54493cb8ad50
+RERI_PERFORMANCE_VERSION = 766dcdc01bf7344a6c93ed3f245a7790408a82f3
 RERI_PERFORMANCE_SITE = https://github.com/ertento/reri-performance.git
 RERI_PERFORMANCE_SITE_METHOD = git
 RERI_PERFORMANCE_DEPENDENCIES = python3 reri-papi

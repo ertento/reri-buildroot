@@ -1,7 +1,0 @@
-config BR2_PACKAGE_RERI_MONITOR_STANDARD
-	bool "RERI standard kernel/GHES monitor"
-	select BR2_PACKAGE_PYTHON3
-	select BR2_PACKAGE_PYTHON3_SQLITE
-	help
-	  Production-oriented monitor that consumes Linux GHES events from
-	  /dev/kmsg and never accesses RERI MMIO directly.

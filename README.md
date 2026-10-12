@@ -1,9 +1,8 @@
 # RERI Buildroot integration
 
-This repository is a Buildroot external tree for the RERI QEMU platform. It builds the guest root filesystem and installs three separate applications:
+This repository is a Buildroot external tree for the RERI QEMU platform. It builds the guest root filesystem and installs two complementary applications:
 
 - `reri-monitor` on port 8080 for laboratory MMIO inspection and test injection
-- `reri-monitor-standard` on port 8081 for kernel GHES event monitoring
 - `reri-performance` on port 8082 for GHES/PAPI correlation
 
 It also builds the RISC-V-enabled PAPI fork and the native per-hart sampler. Generated root filesystems, QEMU binaries, firmware, kernels, EDK2 images, and compiled libraries are intentionally not committed.
@@ -28,9 +27,8 @@ The BusyBox init script reads `reri.profile=` from the kernel command line:
 | Profile | Services |
 | --- | --- |
 | `lab` | MMIO laboratory monitor only |
-| `standard` | kernel/GHES monitor only |
 | `performance` | kernel/GHES plus PAPI monitor only |
-| `both` or omitted | lab and standard monitors |
+| `both` or omitted | lab and performance monitors |
 
 Use `scripts/run-reri-qemu.sh` to boot with the locally built QEMU, OpenSBI, EDK2, kernel, and initramfs. Every artifact path and the hart/record counts can be overridden with the environment variables defined at the top of the script.
 
@@ -42,13 +40,12 @@ Use `scripts/run-reri-qemu.sh` to boot with the locally built QEMU, OpenSBI, EDK
 
 | Component | Branch | Commit |
 | --- | --- | --- |
-| QEMU | `fix/reri-v1.0-compliance` | `e818471cef` |
+| QEMU | `fix/reri-v1.0-compliance` | `f1177ae584e374af029ab20c01a5972c53c7d6cf` |
 | OpenSBI | `fix/reri-v1.0-compliance` | `bc3e6b0a` |
 | Ventana Linux | `dev-upstream` | `92a162a2a` |
 | EDK2 | `dev-upstream` | `997829a` |
 | reri-monitor | `main` | `c0133f765e73f5270b9462d316bae6811340ac39` |
-| reri-monitor-standard | `main` | `4f9556506a19d0c4c7122a80f5a6f9a866aa2e6e` |
-| reri-performance | `main` | `3b285e0a7176d5fe089f63f2f3bf54493cb8ad50` |
+| reri-performance | `main` | `766dcdc01bf7344a6c93ed3f245a7790408a82f3` |
 | reri-papi | `main` | `53b70fc3b6a76deb1c9e6bd1bf42a179347c5b1b` |
 
-The standard and performance monitors use the Linux `/dev/kmsg` GHES stream. Only the laboratory monitor accesses RERI MMIO directly.
+The performance monitor uses the Linux `/dev/kmsg` GHES stream. Only the laboratory monitor accesses RERI MMIO directly.

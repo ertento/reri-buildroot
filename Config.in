@@ -2,7 +2,6 @@ menu "RERI platform packages"
 
 source "$BR2_EXTERNAL_RERI_PATH/package/reri-papi/Config.in"
 source "$BR2_EXTERNAL_RERI_PATH/package/reri-monitor/Config.in"
-source "$BR2_EXTERNAL_RERI_PATH/package/reri-monitor-standard/Config.in"
 source "$BR2_EXTERNAL_RERI_PATH/package/reri-performance/Config.in"
 
 endmenu
